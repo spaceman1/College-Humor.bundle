@@ -61,9 +61,9 @@ def MainMenu():
 	dir.Append(Function(DirectoryItem(OriginalsMenu, "CH Originals", thumb=R("icon-default.png"))))
 	dir.Append(Function(DirectoryItem(ShowMenu, "Recently Added", thumb=R("icon-default.png")), url = CH_ROOT + CH_RECENT))
 	dir.Append(Function(DirectoryItem(ShowMenu, "Most Viewed", thumb=R("icon-default.png")), url = CH_ROOT + CH_VIEWED))
-#	dir.Append(Function(DirectoryItem(VideoPlaylistsMenu, "Video Playlists")))
+	dir.Append(Function(DirectoryItem(VideoPlaylistsMenu, "Video Playlists"), url = CH_ROOT + CH_VIDEO_PLAYLIST))
 #	dir.Append(Function(DirectoryItem(WebCelebMenu, "Web Celeb Archive")))
-#	dir.Append(Function(DirectoryItem(SketchMenu, "Sketch Comedy")))
+	dir.Append(Function(DirectoryItem(SketchMenu, "Sketch Comedy"), url = CH_ROOT + CH_SKETCH))
 	return dir
 
 def getNext(url, menu, xpathPrefix=''):
@@ -93,14 +93,12 @@ def OriginalsMenu(sender):
 		dir.Append(Function(DirectoryItem(ShowMenu, title=title, thumb=R(thumb), summary=summary), url=url))
 	return dir
 	
-def VideoPlaylistsMenu(sender):
+def VideoPlaylistsMenu(sender, url):
 	# FIXME: get FLV url from webpage
 	dir = MediaContainer(title2=sender.itemTitle)
-	url = CH_ROOT + CH_VIDEO_PLAYLIST
-	site = HTML.ElementFromURL(url)
-	for item in site.xpath("//li[@class='gallery']"):
-		title = item.xpath('a/div/strong')[0].text
-		summary = item.xpath('a/div/p')[0].text
+	for item in HTML.ElementFromURL(url).xpath("//div[@class='media video playlist horizontal']"):
+		title = item.xpath('./a')[0].get('title')
+		summary = item.xpath('./div/p')[0].text
 		thumb = item.xpath("a/img")[0].get('src')
 		url = urljoin(CH_ROOT + CH_VIDEO_PLAYLIST, item.xpath('a')[0].get('href'))
 		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, thumb=thumb, summary=summary), url=url))
@@ -119,12 +117,12 @@ def WebCelebMenu(sender):
 		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, summary=summary, thumb=thumb), url=url))
 	return dir
 	
-def SketchMenu(sender):
+def SketchMenu(sender, url):
 	dir = MediaContainer(title2=sender.itemTitle)
-	for item in HTML.ElementFromURL(CH_ROOT + CH_SKETCH).xpath("//li[@class='sketch_group']"):
-		title = item.xpath('.//div[@class="linked_details"]/h3')[0].text
-		url = urljoin(CH_ROOT + CH_SKETCH, item.xpath('./a')[0].get('href'))
-		summary = item.xpath('.//div[@class="video_count"]/a')[0].text.strip()
+	for item in HTML.ElementFromURL(url).xpath("//div[@class='media horizontal sketch_group']"):
+		title = item.xpath('./a')[0].get('title')
+		url = urljoin(url, item.xpath('./a')[0].get('href'))
+		summary = item.xpath('./div[@class="details"]/p')[0].text.strip()
 		thumb = item.xpath('./a/img')[0].get('src')
 		dir.Append(Function(DirectoryItem(ShowMenu, title=title, summary=summary, thumb=thumb), url=url))
 	return dir
