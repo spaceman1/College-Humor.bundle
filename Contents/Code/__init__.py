@@ -37,23 +37,6 @@ def GetFlvFromPage(url, sender=None):
 	Log(video)
 	return Redirect(video)
 
-def AddVideos(site, dir, path, parentSectionID = ''):
-	for div in site.xpath(path):
-		try: title = div.xpath("div[@class='linked_details']/strong[@class='title']")[0].text_content().strip()
-		except: title = ''
-
-		try: summary = div.xpath("div[@class='linked_details']/p")[0].text_content().strip()
-		except: summary = ''
-
-		try: thumb = div.xpath("a/img[@class='media_thumb']")[0].get('src')
-		except: thumb = ''
-
-		try: video_path = div.xpath("a[@class='video_link']")[0].get('href')
-		except: video_path = ''
-
-		dir.Append(Function(VideoItem(GetFlvUrl, title=title, summary=summary, thumb=thumb), url=video_path))
-		
-
 ####################################################################################################
 
 def MainMenu():
@@ -66,8 +49,8 @@ def MainMenu():
 	dir.Append(Function(DirectoryItem(SketchMenu, "Sketch Comedy"), url = CH_ROOT + CH_SKETCH))
 	return dir
 
-def getNext(url, menu, xpathPrefix=''):
-	next = HTML.ElementFromURL(url).xpath('%s//span[@class="next"]/parent::a' % xpathPrefix)
+def getNext(url, menu):
+	next = HTML.ElementFromURL(url).xpath('//a[@class="next"]')
 	if len(next) != 0:
 		return Function(DirectoryItem(menu, title='Next', thumb=R('Next.png')), url=urljoin(CH_ROOT, next[0].get('href')))
 
@@ -100,31 +83,22 @@ def VideoPlaylistsMenu(sender, url):
 		title = item.xpath('./a')[0].get('title')
 		summary = item.xpath('./div/p')[0].text
 		thumb = item.xpath("a/img")[0].get('src')
-		url = urljoin(CH_ROOT + CH_VIDEO_PLAYLIST, item.xpath('a')[0].get('href'))
-		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, thumb=thumb, summary=summary), url=url))
-	next = getNext(url, ShowMenu)
+		videoURL = urljoin(CH_ROOT + CH_VIDEO_PLAYLIST, item.xpath('a')[0].get('href'))
+		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, thumb=thumb, summary=summary), url=videoURL))
+	next = getNext(url, VideoPlaylistsMenu)
 	if next != None: dir.Append(next)
-	return dir
-
-def WebCelebMenu(sender):
-	# FIXME: invalid videos
-	dir = MediaContainer(title2=sender.itemTitle)
-	for item in HTML.ElementFromURL(CH_ROOT + CH_WEB_CELEB).xpath("//li[@class='video']"):
-		title = item.xpath('./a')[0].get('title')
-		thumb = item.xpath('./a/img')[0].get('src')
-		summary = item.xpath("div[@class='linked_details']/p")[0].text_content().strip()
-		url = urljoin(CH_ROOT + CH_WEB_CELEB, item.xpath('./a')[0].get('href'))
-		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, summary=summary, thumb=thumb), url=url))
 	return dir
 	
 def SketchMenu(sender, url):
 	dir = MediaContainer(title2=sender.itemTitle)
 	for item in HTML.ElementFromURL(url).xpath("//div[@class='media horizontal sketch_group']"):
 		title = item.xpath('./a')[0].get('title')
-		url = urljoin(url, item.xpath('./a')[0].get('href'))
+		videoURL = urljoin(url, item.xpath('./a')[0].get('href'))
 		summary = item.xpath('./div[@class="details"]/p')[0].text.strip()
 		thumb = item.xpath('./a/img')[0].get('src')
-		dir.Append(Function(DirectoryItem(ShowMenu, title=title, summary=summary, thumb=thumb), url=url))
+		dir.Append(Function(DirectoryItem(ShowMenu, title=title, summary=summary, thumb=thumb), url=videoURL))
+	next = getNext(url, SketchMenu)
+	if next != None: dir.Append(next)
 	return dir
 
 def ShowMenu(sender, url):
