@@ -40,9 +40,9 @@ def GetFlvFromPage(url, sender=None):
 
 def MainMenu():
 	dir = MediaContainer()
-	cookies = HTTP.GetCookiesForURL(CH_ROOT)
+	MediaContainer.httpCookies = HTTP.GetCookiesForURL(CH_ROOT)
 	dir.Append(Function(DirectoryItem(OriginalsMenu, "CH Originals", thumb=R("icon-default.png"))))
-	dir.Append(Function(DirectoryItem(ShowMenu, "Recently Added", thumb=R("icon-default.png")), url = CH_ROOT + CH_RECENT, cookies=cookies))
+	dir.Append(Function(DirectoryItem(ShowMenu, "Recently Added", thumb=R("icon-default.png")), url = CH_ROOT + CH_RECENT))
 	dir.Append(Function(DirectoryItem(ShowMenu, "Most Viewed", thumb=R("icon-default.png")), url = CH_ROOT + CH_VIEWED))
 	dir.Append(Function(DirectoryItem(VideoPlaylistsMenu, "Video Playlists"), url = CH_ROOT + CH_VIDEO_PLAYLIST))
 	dir.Append(Function(DirectoryItem(SketchMenu, "Sketch Comedy"), url = CH_ROOT + CH_SKETCH))
@@ -100,8 +100,8 @@ def SketchMenu(sender, url):
 	if next != None: dir.Append(next)
 	return dir
 
-def ShowMenu(sender, url, cookies):
-	dir = MediaContainer(title2=sender.itemTitle, httpCookies=cookies)	
+def ShowMenu(sender, url):
+	dir = MediaContainer(title2=sender.itemTitle)
 	for item in HTML.ElementFromURL(url).xpath('//div[@class="media video horizontal"]'):
 		title = item.xpath('./a')[0].get('title')
 		itemURL = item.xpath('./a')[0].get('href')
