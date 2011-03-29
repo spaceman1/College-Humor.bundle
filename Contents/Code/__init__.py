@@ -1,18 +1,17 @@
 from urlparse import urljoin
 
-CH_ROOT            = "http://www.collegehumor.com"
-CH_PLUGIN_PREFIX   = "/video/college_humor"
-CH_RECENT          = "/originals/recent"
-CH_VIEWED          = "/originals/most-viewed"
-CH_LIKED           = "/originals/most-liked"
+CH_ROOT = "http://www.collegehumor.com"
+CH_PLUGIN_PREFIX = "/video/college_humor"
+CH_RECENT = "/videos"
+CH_VIEWED = "/videos/most-viewed"
+
 CH_VIDEO_PLAYLIST = '/videos/playlists'
 CH_WEB_CELEB = '/web-celeb-hall-of-fame'
 CH_SKETCH = '/sketch-comedy'
-
 CH_PLAYLIST        = "/moogaloop"
 
-
 ####################################################################################################
+
 def Start():
 	Plugin.AddPrefixHandler(CH_PLUGIN_PREFIX, MainMenu, "College Humor", "icon-default.png", "art-default.jpg")
 	Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
@@ -21,6 +20,7 @@ def Start():
 	MediaContainer.art = R('art-default.jpg')
 	DirectoryItem.thumb = R('icon-default.png')
 	HTTP.SetCacheTime(CACHE_1HOUR)
+	
 ####################################################################################################
 
 def GetFlvUrl(url, sender=None):
@@ -53,15 +53,14 @@ def AddVideos(site, dir, path, parentSectionID = ''):
 
 		dir.Append(Function(VideoItem(GetFlvUrl, title=title, summary=summary, thumb=thumb), url=video_path))
 		
-		
 
 ####################################################################################################
+
 def MainMenu():
 	dir = MediaContainer()
 	dir.Append(Function(DirectoryItem(OriginalsMenu, "CH Originals", thumb=R("icon-default.png"))))
-	dir.Append(Function(DirectoryItem(RecentMenu, "Recently Added", thumb=R("icon-default.png")), url = CH_ROOT + CH_RECENT))
-	dir.Append(Function(DirectoryItem(MostViewedMenu, "Most Viewed", thumb=R("icon-default.png")), url = CH_ROOT + CH_VIEWED))
-	dir.Append(Function(DirectoryItem(MostLikedMenu, "Most Liked", thumb=R("icon-default.png")), url = CH_ROOT + CH_LIKED))
+	dir.Append(Function(DirectoryItem(ShowMenu, "Recently Added", thumb=R("icon-default.png")), url = CH_ROOT + CH_RECENT))
+	dir.Append(Function(DirectoryItem(ShowMenu, "Most Viewed", thumb=R("icon-default.png")), url = CH_ROOT + CH_VIEWED))
 #	dir.Append(Function(DirectoryItem(VideoPlaylistsMenu, "Video Playlists")))
 #	dir.Append(Function(DirectoryItem(WebCelebMenu, "Web Celeb Archive")))
 #	dir.Append(Function(DirectoryItem(SketchMenu, "Sketch Comedy")))
@@ -92,30 +91,6 @@ def OriginalsMenu(sender):
 		title = show.text
 		thumb, summary = thumbs.get(title, ['', ''])
 		dir.Append(Function(DirectoryItem(ShowMenu, title=title, thumb=R(thumb), summary=summary), url=url))
-	return dir
-
-def RecentMenu(sender, url):
-	dir = MediaContainer(title2="Recently Added")
-	site = HTML.ElementFromURL(url)
-	AddVideos(site, dir, "//div[@id='tab_content_1']/ul[@class='media_list cfx']/li[@class='video']")
-	next = getNext(url, RecentMenu, "//div[@id='tab_content_1']")
-	if next != None: dir.Append(next)
-	return dir
-	
-def MostViewedMenu(sender, url):
-	dir = MediaContainer(title2="Most Viewed")
-	site = HTML.ElementFromURL(url)
-	AddVideos(site, dir, "//div[@id='tab_content_2']/ul[@class='media_list cfx']/li[@class='video']")
-	next = getNext(url, MostViewedMenu, "//div[@id='tab_content_2']")
-	if next != None: dir.Append(next)
-	return dir
-	
-def MostLikedMenu(sender, url):
-	dir = MediaContainer(title2="Most Liked")
-	site = HTML.ElementFromURL(url)
-	AddVideos(site, dir, "//div[@id='tab_content_3']/ul[@class='media_list cfx']/li[@class='video']")
-	next = getNext(url, MostLikedMenu, "//div[@id='tab_content_3']")
-	if next != None: dir.Append(next)
 	return dir
 	
 def VideoPlaylistsMenu(sender):
