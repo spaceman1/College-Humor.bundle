@@ -1,7 +1,4 @@
 from urlparse import urljoin
-from PMS import *
-from PMS.Objects import *
-from PMS.Shortcuts import *
 
 CH_ROOT            = "http://www.collegehumor.com"
 CH_PLUGIN_PREFIX   = "/video/college_humor"
@@ -22,11 +19,12 @@ def Start():
 	MediaContainer.title1 = L('College Humor')
 	MediaContainer.viewGroup = 'Details'
 	MediaContainer.art = R('art-default.jpg')
+	DirectoryItem.thumb = R('icon-default.png')
 	HTTP.SetCacheTime(CACHE_1HOUR)
 ####################################################################################################
 
 def GetFlvUrl(url, sender=None):
-	playlist_xml = XML.ElementFromURL(CH_ROOT + CH_PLAYLIST + '/' + url, True)
+	playlist_xml = HTML.ElementFromURL(CH_ROOT + CH_PLAYLIST + '/' + url)
 	#playlist_xml = XML.ElementFromURL(url, True)
 	try: flv_url = playlist_xml.xpath("video/file")[0].text_content()
 	except: flv_url = ''
@@ -34,7 +32,7 @@ def GetFlvUrl(url, sender=None):
 	return Redirect(flv_url)
 
 def GetFlvFromPage(url, sender=None):
-	video = XML.ElementFromURL(url, True).xpath('//div[@id="flash_player"]/object')[0].get('data')
+	video = HTML.ElementFromURL(url).xpath('//div[@id="flash_player"]/object')[0].get('data')
 	video = urljoin(url, video)
 	Log(video)
 	return Redirect(video)
@@ -70,7 +68,7 @@ def MainMenu():
 	return dir
 
 def getNext(url, menu, xpathPrefix=''):
-	next = XML.ElementFromURL(url, True).xpath('%s//span[@class="next"]/parent::a' % xpathPrefix)
+	next = HTML.ElementFromURL(url).xpath('%s//span[@class="next"]/parent::a' % xpathPrefix)
 	if len(next) != 0:
 		return Function(DirectoryItem(menu, title='Next', thumb=R('Next.png')), url=urljoin(CH_ROOT, next[0].get('href')))
 
@@ -89,7 +87,7 @@ def OriginalsMenu(sender):
 		"Jake & Amir": ["icon-jake-amir.png", "BFF's. No were not."],
 		"Bleep Bloop": ["icon-bleep-bloop.png", 'The videogames talk show hosted by Jeff Rubin. Where two thumbs down is a good thing!'],
 	}
-	for show in XML.ElementFromURL(CH_ROOT, True).xpath('//div[@class="dropdown"]/ul/li[text()="CH Originals"]/following-sibling::li/a')[:-2]:
+	for show in HTML.ElementFromURL(CH_ROOT).xpath('//div[@class="dropdown"]/ul/li[text()="CH Originals"]/following-sibling::li/a')[:-2]:
 		url = urljoin(CH_ROOT, show.get('href'))
 		title = show.text
 		thumb, summary = thumbs.get(title, ['', ''])
@@ -98,7 +96,7 @@ def OriginalsMenu(sender):
 
 def RecentMenu(sender, url):
 	dir = MediaContainer(title2="Recently Added")
-	site = XML.ElementFromURL(url, True)
+	site = HTML.ElementFromURL(url)
 	AddVideos(site, dir, "//div[@id='tab_content_1']/ul[@class='media_list cfx']/li[@class='video']")
 	next = getNext(url, RecentMenu, "//div[@id='tab_content_1']")
 	if next != None: dir.Append(next)
@@ -106,7 +104,7 @@ def RecentMenu(sender, url):
 	
 def MostViewedMenu(sender, url):
 	dir = MediaContainer(title2="Most Viewed")
-	site = XML.ElementFromURL(url, True)
+	site = HTML.ElementFromURL(url)
 	AddVideos(site, dir, "//div[@id='tab_content_2']/ul[@class='media_list cfx']/li[@class='video']")
 	next = getNext(url, MostViewedMenu, "//div[@id='tab_content_2']")
 	if next != None: dir.Append(next)
@@ -114,7 +112,7 @@ def MostViewedMenu(sender, url):
 	
 def MostLikedMenu(sender, url):
 	dir = MediaContainer(title2="Most Liked")
-	site = XML.ElementFromURL(url, True)
+	site = HTML.ElementFromURL(url)
 	AddVideos(site, dir, "//div[@id='tab_content_3']/ul[@class='media_list cfx']/li[@class='video']")
 	next = getNext(url, MostLikedMenu, "//div[@id='tab_content_3']")
 	if next != None: dir.Append(next)
@@ -124,7 +122,7 @@ def VideoPlaylistsMenu(sender):
 	# FIXME: get FLV url from webpage
 	dir = MediaContainer(title2=sender.itemTitle)
 	url = CH_ROOT + CH_VIDEO_PLAYLIST
-	site = XML.ElementFromURL(url, True)
+	site = HTML.ElementFromURL(url)
 	for item in site.xpath("//li[@class='gallery']"):
 		title = item.xpath('a/div/strong')[0].text
 		summary = item.xpath('a/div/p')[0].text
@@ -138,7 +136,7 @@ def VideoPlaylistsMenu(sender):
 def WebCelebMenu(sender):
 	# FIXME: invalid videos
 	dir = MediaContainer(title2=sender.itemTitle)
-	for item in XML.ElementFromURL(CH_ROOT + CH_WEB_CELEB, True).xpath("//li[@class='video']"):
+	for item in HTML.ElementFromURL(CH_ROOT + CH_WEB_CELEB).xpath("//li[@class='video']"):
 		title = item.xpath('./a')[0].get('title')
 		thumb = item.xpath('./a/img')[0].get('src')
 		summary = item.xpath("div[@class='linked_details']/p")[0].text_content().strip()
@@ -148,7 +146,7 @@ def WebCelebMenu(sender):
 	
 def SketchMenu(sender):
 	dir = MediaContainer(title2=sender.itemTitle)
-	for item in XML.ElementFromURL(CH_ROOT + CH_SKETCH, True).xpath("//li[@class='sketch_group']"):
+	for item in HTML.ElementFromURL(CH_ROOT + CH_SKETCH).xpath("//li[@class='sketch_group']"):
 		title = item.xpath('.//div[@class="linked_details"]/h3')[0].text
 		url = urljoin(CH_ROOT + CH_SKETCH, item.xpath('./a')[0].get('href'))
 		summary = item.xpath('.//div[@class="video_count"]/a')[0].text.strip()
@@ -158,11 +156,11 @@ def SketchMenu(sender):
 
 def ShowMenu(sender, url):
 	dir = MediaContainer(title2=sender.itemTitle)	
-	for item in XML.ElementFromURL(url, True).xpath('//li[starts-with(@class, "video")]'):
-		title = item.xpath('./a[@class="video_link"]')[0].get('title')
-		itemURL = item.xpath('./a[@class="video_link"]')[0].get('href')
-		summary = item.xpath('./div[@class="linked_details"]/p')[0].text.strip()
-		thumb = item.xpath('./a[@class="video_link"]/img')[0].get('src')
+	for item in HTML.ElementFromURL(url).xpath('//div[@class="media video horizontal"]'):
+		title = item.xpath('./a')[0].get('title')
+		itemURL = item.xpath('./a')[0].get('href')
+		summary = item.xpath('./div[@class="details"]/p')[0].text.strip()
+		thumb = item.xpath('./a/img')[0].get('src')
 		dir.Append(Function(VideoItem(GetFlvUrl, title=title, summary=summary, thumb=thumb), url=itemURL))
 	next = getNext(url, ShowMenu)
 	if next != None: dir.Append(next)
