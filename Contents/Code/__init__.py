@@ -83,7 +83,7 @@ def VideoPlaylistsMenu(sender, url):
 		summary = item.xpath('./div/p')[0].text
 		thumb = item.xpath("a/img")[0].get('src')
 		videoURL = urljoin(CH_ROOT + CH_VIDEO_PLAYLIST, item.xpath('a')[0].get('href'))
-		dir.Append(Function(VideoItem(GetFlvFromPage, title=title, thumb=thumb, summary=summary), url=videoURL))
+		dir.Append(Function(DirectoryItem(ShowMenu, title=title, thumb=thumb, summary=summary), url=videoURL))
 	next = getNext(url, VideoPlaylistsMenu)
 	if next != None: dir.Append(next)
 	return dir
