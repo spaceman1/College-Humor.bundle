@@ -57,22 +57,27 @@ def getNext(url, menu):
 def OriginalsMenu(sender):
 	dir = MediaContainer(title2=sender.itemTitle)
 	thumbs = {
-		"All Originals": ["icon-default.png", 'CollegeHumor Originals are original comedy videos written, directed and produced by the CollegeHumor staff. From our acclaimed pop culture-skewering shorts to our in-office sketch series, our 10 new videos per week will make you laugh until milk comes out your nose. Whether or not you have been drinking milk.'],
-		"CH Music": ["icon-CHMusic.png", 'Check out our collection of original and parody music videos, because as Wolfgang Amadeus Mozart once said, "Funny songs are better than normal songs."'],
-		"Animations": ["icon-animations.png", "Cartoons aren't just for Saturday morning anymore. For instance, you could watch them on Tuesday afternoon. Or Thursday at dusk! The point is, these sketches are animated."],
-		"Streeter Theeter": ["icon-streeter.png", "CollegeHumor editor Streeter Seidell is a man of many faces, if not talents. Here is where those faces gather."],
-		"CH Live": ["icon-chlive.png", "Every month CollegeHumor escapes the Internet to put on a live comedy show at the Upright Citizens Brigade Theatre in New York City, featuring the CH staff and the best stand-up comedians and sketch groups."],
-		"Prank War": ["icon-prank-wars.png", 'Since 2006, CollegeHumor employees Amir Blumenfeld and Streeter Seidell have been embarrassing each other with increasingly elaborate pranks. Enjoy their humiliation here!'],
-		"Sketches": ["icon-sketches.png", 'The bread and butter of CH Originals, these live-action comedy videos take satirical aim at everything under the sun. So for instance, not the moon.'],
-		"Hardly Working": ["icon-hardly-working.png", 'The CollegeHumor staff writers are the stars of these absurdist sketches, filmed right here in our New York City office.'],
-		"Jake & Amir": ["icon-jake-amir.png", "BFF's. No were not."],
-		"Bleep Bloop": ["icon-bleep-bloop.png", 'The videogames talk show hosted by Jeff Rubin. Where two thumbs down is a good thing!'],
+		'All Originals': [R('icon-default.png'), 'CollegeHumor Originals are original comedy videos written, directed and produced by the CollegeHumor staff. From our acclaimed pop culture-skewering shorts to our in-office sketch series, our 10 new videos per week will make you laugh until milk comes out your nose. Whether or not you have been drinking milk.'],
+		'Sketch': ['http://6.media.collegehumor.cvcdn.com/62/39/collegehumor.efc39e574428dfaac412e2a689b68e61.jpg', 'The bread and butter of CH Originals, these live-action comedy videos take satirical aim at everything under the sun. So for instance, not the moon.'],
+		'Star of the Week' : ['http://5.media.collegehumor.cvcdn.com/18/15/collegehumor.ce4c67d997c2bf6ccf149bba7d94fd82.jpg', 'CollegeHumor partners with Hollywood to bring you star-studded internet videos.'],
+		'Animation' : ['http://7.media.collegehumor.cvcdn.com/69/68/collegehumor.d2041765f55a58f8d819fb29189b830c.jpg', "Cartoons aren't just for Saturday morning anymore. For instance, you could watch them on Tuesday afternoon. Or Thursday at dusk! The point is, these sketches are animated."],
+		'Music Videos': ['http://9.media.collegehumor.cvcdn.com/56/15/collegehumor.4574f62ecd331496bee8f126a2920873.jpg', 'As Wolfgang Amadeus Mozart once said, "Funny songs are better than normal songs."'],
+		'Troopers': ['http://8.media.collegehumor.cvcdn.com/15/7/collegehumor.006244cdd376d17aa8ebb0fbc755fdf1.jpg', 'In intergalactic war, there are heroes, there are villains, and then there are these guys.'],
+		'Nerd Alert': ['http://4.media.collegehumor.cvcdn.com/50/39/collegehumor.c816b3d7a5928fc19662cb8a59968c39.jpg', 'Every week, three experts discuss the latest in videogames, comic books, cartoons and the other stuff that used to get them beat up.'],
+		'Jake and Amir': ['http://3.media.collegehumor.cvcdn.com/8/69/collegehumor.30baaedd706f5adb55f50eb197c41f53.jpg', 'Jake and Amir are two co-workers. And best friends. Just co-workers.'],
+		'Hardly Working': ['http://3.media.collegehumor.cvcdn.com/23/56/collegehumor.eb447318daa1d7f39622db3b8faa36e2.jpg', 'A workplace comedy about a comedy workplace.'],
+		'Bad Dads': ['http://4.media.collegehumor.cvcdn.com/9/0/collegehumor.200bce938759ef954d5312650dcb3912.jpg', 'Before today, Cory had never met his father. Maybe it was better that way. Starring Michael Cera.'],
+		'Very Mary-Kate': ['http://1.media.collegehumor.cvcdn.com/51/28/collegehumor.93260d2a5d79917a4c1f65a9d7f94f3a.jpg', "The unofficial biography of everyone's favorite Olsen twin."],
+		'Full Benefits': ['http://0.media.collegehumor.cvcdn.com/4/45/collegehumor.2a16f1566f8397988ac2d5a73def19bb.jpg', 'Sarah and David complicate their work relationship.'],
+		'Hello, My Name Is': ['http://3.media.collegehumor.cvcdn.com/19/74/collegehumor.0d97717c01ece1107ba674b07fc4be97.jpg', 'Wigs first, questions later. Spontaneous character-creation with Josh Ruben and Pat Cassels.'],
+		'Prank War': ["http://2.media.collegehumor.cvcdn.com/8/12/collegehumor.f8483a22133b84482f6bd1c4caf9221e.jpg", 'Since 2006, CollegeHumor employees Amir Blumenfeld and Streeter Seidell have been embarrassing each other with increasingly elaborate pranks. Enjoy their humiliation here!'],
+		
 	}
-	for show in HTML.ElementFromURL(CH_ROOT).xpath('//div[@class="dropdown"]/ul/li[text()="CH Originals"]/following-sibling::li/a')[:-2]:
+	for show in HTML.ElementFromURL(CH_ROOT + '/videos').xpath('//div[@class="sidebar_nav"]/ul[2]/li/a')[:-1]:
 		url = urljoin(CH_ROOT, show.get('href'))
 		title = show.text
 		thumb, summary = thumbs.get(title, ['', ''])
-		dir.Append(Function(DirectoryItem(ShowMenu, title=title, thumb=R(thumb), summary=summary), url=url))
+		dir.Append(Function(DirectoryItem(ShowMenu, title=title, thumb=thumb, summary=summary), url=url))
 	return dir
 	
 def VideoPlaylistsMenu(sender, url):
